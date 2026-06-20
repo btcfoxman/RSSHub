@@ -1,0 +1,4 @@
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+test/.env.example text eol=lf

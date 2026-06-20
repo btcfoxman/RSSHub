@@ -43,16 +43,28 @@ if id "${APP_USER}" >/dev/null 2>&1; then
   chown -R "${APP_USER}:${APP_USER}" "${APP_DIR}" || true
 fi
 
+if [ -n "${GHCR_TOKEN:-}" ]; then
+  log "Logging in to GHCR"
+  docker_login_ghcr() {
+    printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME:-${GITHUB_ACTOR:-btcfoxman}}" --password-stdin >/dev/null
+  }
+  retry 5 10 docker_login_ghcr
+fi
+
 cd "${APP_DIR}"
+export IMAGE_REGISTRY="${IMAGE_REGISTRY:-ghcr.io}"
+export IMAGE_NAMESPACE="${IMAGE_NAMESPACE:-btcfoxman}"
+export IMAGE_NAME="${IMAGE_NAME:-rsshub}"
+export IMAGE_TAG="${IMAGE_TAG:-test-latest}"
 
 log "Validating compose config"
 docker compose config >/dev/null
 
 log "Pulling image"
-retry 5 10 docker compose pull
+retry 8 15 docker compose pull rsshub
 
 log "Starting service"
-docker compose up -d --remove-orphans
+docker compose up -d --remove-orphans rsshub
 
 log "Waiting for service health"
 for i in $(seq 1 20); do

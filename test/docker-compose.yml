@@ -1,16 +1,18 @@
 services:
   rsshub:
-    image: ${RSSHUB_IMAGE:-diygod/rsshub:latest}
+    image: ${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-btcfoxman}/${IMAGE_NAME:-rsshub}:${IMAGE_TAG:-test-latest}
     container_name: ai-rsshub
     restart: unless-stopped
     networks:
       - my-shared-net
+    env_file:
+      - ./.env
     environment:
       NODE_ENV: production
-      CACHE_TYPE: memory
-      CACHE_EXPIRE: 300
-      REQUEST_RETRY: 2
-      REQUEST_TIMEOUT: 10000
+      CACHE_TYPE: ${CACHE_TYPE:-memory}
+      CACHE_EXPIRE: ${CACHE_EXPIRE:-300}
+      REQUEST_RETRY: ${REQUEST_RETRY:-2}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-10000}
     ports:
       - "1200:1200"
     healthcheck:
